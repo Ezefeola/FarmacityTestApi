@@ -1,7 +1,7 @@
 ﻿using Core.Utilities.QueryOptions.Pagination;
 
 namespace Core.Contracts.DTOs.Productos.Request;
-public record GetProductosRequestDto : IHasPaginationOptions
+public sealed record GetProductosRequestDto : IHasPaginationOptions
 {
     public int? Page { get; set; }
 

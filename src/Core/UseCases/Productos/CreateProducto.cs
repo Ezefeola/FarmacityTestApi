@@ -36,17 +36,29 @@ public class CreateProducto : ICreateProducto
             return Result<CreateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
                                                     .WithErrors(validatorResult.Errors.Select(x => x.ErrorMessage).ToList());    
         }
+        bool productoNombreExists = await _unitOfWork.ProductoRepository.ProductoNombreActivoExistsAsync(requestDto.Nombre, cancellationToken);
+        if(productoNombreExists)
+        {
+            return Result<CreateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
+                                                    .WithErrors([
+                                                        $"{ValidationMessages.Producto.PRODUCTO_NOMBRE_ACTIVO_EXISTS} " +
+                                                        $"(NOMBRE: {requestDto.Nombre})"
+                                                    ]);
+        }
 
         List<string> codigosBarras = requestDto.CodigosBarras
-                                            .Select(cb => cb.Codigo.Trim())
+                                            .Select(x => x.Codigo.Trim())
                                             .ToList();
-        foreach (string? codigo in codigosBarras)
+        foreach (string codigoBarra in codigosBarras)
         {
-            bool exists = await _unitOfWork.CodigoBarraRepository.CodigoBarraExistsAsync(codigo, cancellationToken);
+            bool exists = await _unitOfWork.CodigoBarraRepository.CodigoBarraActivoExistsAsync(codigoBarra, cancellationToken);
             if (exists)
             {
                 return Result<CreateProductoResponseDto>.Success(HttpStatusCode.BadRequest)
-                                                        .WithErrors([$"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} : {codigo}"]);
+                                                        .WithErrors([
+                                                            $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} " +
+                                                            $"(CODIGO_BARRA: {codigoBarra})"
+                                                        ]);
             }
         }
 
@@ -55,7 +67,7 @@ public class CreateProducto : ICreateProducto
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         CreateProductoResponseDto responseDto = producto.ToCreateProductoResponseDto();
-        return Result<CreateProductoResponseDto>.Success(HttpStatusCode.OK)
+        return Result<CreateProductoResponseDto>.Success(HttpStatusCode.Created)
                                                 .WithPayload(responseDto);
     }
 }

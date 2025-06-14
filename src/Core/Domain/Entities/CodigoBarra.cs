@@ -1,4 +1,5 @@
 ﻿using Core.Domain.Abstractions;
+using static Core.Utilities.Validations.ValidationMessages;
 
 namespace Core.Domain.Entities;
 public class CodigoBarra : Entity<int>
@@ -10,4 +11,14 @@ public class CodigoBarra : Entity<int>
     public int ProductoId { get; set; }
     public Producto Producto { get; set; } = default!;
     public string Codigo { get; set; } = default!;
+
+    public CodigoBarra SoftDelete()
+    {
+        if (!Activo) return this;
+
+        Activo = false;
+        FechaModificacion = DateTime.UtcNow;
+
+        return this;
+    }
 }

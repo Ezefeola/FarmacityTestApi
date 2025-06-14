@@ -25,12 +25,11 @@ public static class BaseEntityConfig
                .ValueGeneratedOnAdd();
 
         builder.Property(e => e.FechaModificacion)
-               .HasColumnType("datetime")
-               .ValueGeneratedOnUpdate();
+               .HasColumnType("datetime");
 
         builder.HasQueryFilter(e => e.Activo);
 
         builder.HasIndex(e => e.Activo)
-               .HasFilter("Activo = 0");
+               .HasFilter("Activo = 1");
     }
 }

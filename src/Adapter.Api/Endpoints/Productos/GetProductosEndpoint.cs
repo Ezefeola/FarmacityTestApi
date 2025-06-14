@@ -16,7 +16,7 @@ namespace Adapter.Api.Endpoints.Productos
                       .Produces<GetProductosResponseDto>(StatusCodes.Status200OK)
                       .ProducesProblem(StatusCodes.Status404NotFound)
                       .WithSummary("Get Productos")
-                      .WithDescription("Get Producto"); ;
+                      .WithDescription("Get Producto");
         }
 
         private static async Task<Result<GetProductosResponseDto>> GetProductosHandler(

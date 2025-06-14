@@ -56,13 +56,12 @@ namespace Adapter.SqlServer.Migrations
                 name: "IX_CodigoBarra_Activo",
                 table: "CodigoBarra",
                 column: "Activo",
-                filter: "Activo = 0");
+                filter: "Activo = 1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CodigoBarra_Codigo",
                 table: "CodigoBarra",
-                column: "Codigo",
-                unique: true);
+                column: "Codigo");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CodigoBarra_ProductoId",
@@ -73,7 +72,12 @@ namespace Adapter.SqlServer.Migrations
                 name: "IX_Producto_Activo",
                 table: "Producto",
                 column: "Activo",
-                filter: "Activo = 0");
+                filter: "Activo = 1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Producto_Nombre",
+                table: "Producto",
+                column: "Nombre");
         }
 
         /// <inheritdoc />

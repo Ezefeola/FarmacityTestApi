@@ -12,7 +12,8 @@ public class ProductoConfiguration : EntityTypeBaseConfiguration<Producto>
     protected override void ConfigurateProperties(EntityTypeBuilder<Producto> builder)
     {
         builder.Property(x => x.Nombre)
-               .HasMaxLength(Producto.Rules.NOMBRE_MAX_LENGTH);
+                .HasMaxLength(Producto.Rules.NOMBRE_MAX_LENGTH);
+        builder.HasIndex(p => p.Nombre);
 
         builder.Property(x => x.Precio)
                .HasPrecision(18, 2);

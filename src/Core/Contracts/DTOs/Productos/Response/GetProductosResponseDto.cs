@@ -1,7 +1,7 @@
 ﻿using Core.Contracts.DTOs.Common;
 
 namespace Core.Contracts.DTOs.Productos.Response;
-public record GetProductosResponseDto : PaginatedResponseDto<ProductosResponseDto>
+public sealed record GetProductosResponseDto : PaginatedResponseDto<ProductosResponseDto>
 {
        
 }

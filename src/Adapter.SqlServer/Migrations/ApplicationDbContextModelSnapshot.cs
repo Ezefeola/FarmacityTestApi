@@ -43,7 +43,6 @@ namespace Adapter.SqlServer.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<DateTime?>("FechaModificacion")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("datetime");
 
                     b.Property<int>("ProductoId")
@@ -52,10 +51,9 @@ namespace Adapter.SqlServer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Activo")
-                        .HasFilter("Activo = 0");
+                        .HasFilter("Activo = 1");
 
-                    b.HasIndex("Codigo")
-                        .IsUnique();
+                    b.HasIndex("Codigo");
 
                     b.HasIndex("ProductoId");
 
@@ -81,7 +79,6 @@ namespace Adapter.SqlServer.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<DateTime?>("FechaModificacion")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("datetime");
 
                     b.Property<string>("Nombre")
@@ -96,7 +93,9 @@ namespace Adapter.SqlServer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Activo")
-                        .HasFilter("Activo = 0");
+                        .HasFilter("Activo = 1");
+
+                    b.HasIndex("Nombre");
 
                     b.ToTable("Producto");
                 });

@@ -16,9 +16,9 @@ public static class ProductoMappers
             CantidadEnStock = requestDto.CantidadEnStock,
             Activo = true,
             FechaAlta = DateTime.UtcNow,
-            CodigosBarras = codigosBarras.Select(c => new CodigoBarra
+            CodigosBarras = codigosBarras.Select(codigoBarra => new CodigoBarra
             {
-                Codigo = c,
+                Codigo = codigoBarra,
                 Activo = true,
                 FechaAlta = DateTime.UtcNow
             }).ToList()
@@ -29,6 +29,7 @@ public static class ProductoMappers
     {
         return new CreateProductoResponseDto
         {
+            ProductoId = producto.Id,   
             Nombre = producto.Nombre,
             Precio = producto.Precio,
             CantidadEnStock = producto.CantidadEnStock,
@@ -36,10 +37,32 @@ public static class ProductoMappers
             FechaAlta = producto.FechaAlta,
             CodigosBarras = producto.CodigosBarras.Select(codigosBarras => new CodigoBarraResponseDto
             {
-                Id = codigosBarras.Id,  
+                CodigoBarraId = codigosBarras.Id,  
                 Codigo = codigosBarras.Codigo,
                 Activo = codigosBarras.Activo,
                 FechaAlta = codigosBarras.FechaAlta
+            }).ToList()
+        };
+    }
+
+    public static UpdateProductoResponseDto ToUpdateProductoResponseDto(this Producto producto)
+    {
+        return new UpdateProductoResponseDto
+        {
+            ProductoId = producto.Id,
+            Nombre = producto.Nombre,
+            Precio = producto.Precio,
+            CantidadEnStock = producto.CantidadEnStock,
+            Activo = producto.Activo,
+            FechaAlta = producto.FechaAlta,
+            FechaModificacion = producto.FechaModificacion,
+            CodigosBarras = producto.CodigosBarras.Select(codigoBarra => new CodigoBarraResponseDto
+            {
+                CodigoBarraId = codigoBarra.Id,
+                Codigo = codigoBarra.Codigo,
+                Activo = codigoBarra.Activo,
+                FechaAlta = codigoBarra.FechaAlta,
+                FechaModificacion = codigoBarra.FechaModificacion
             }).ToList()
         };
     }
@@ -58,6 +81,7 @@ public static class ProductoMappers
             TotalRecords = totalRecordsCount,
             Items = productos.Select(producto => new ProductosResponseDto
             {
+                ProductoId = producto.Id,
                 Nombre = producto.Nombre,
                 Precio = producto.Precio,
                 Activo = producto.Activo,
@@ -66,13 +90,76 @@ public static class ProductoMappers
                 FechaModificacion = producto.FechaModificacion,
                 CodigosBarras = producto.CodigosBarras.Select(codigoBarra => new CodigoBarraResponseDto
                 {
-                    Id = codigoBarra.Id,
+                    CodigoBarraId = codigoBarra.Id,
                     Codigo = codigoBarra.Codigo,
                     Activo = codigoBarra.Activo,
                     FechaAlta = codigoBarra.FechaAlta,
                     FechaModificacion = codigoBarra.FechaModificacion
                 }).ToList()
             }).ToList(),
+        };
+    }
+
+    public static GetProductoByIdResponseDto ToGetProductoByIdResponseDto(this Producto producto)
+    {
+        return new GetProductoByIdResponseDto()
+        {
+            ProductoId = producto.Id,
+            Nombre = producto.Nombre,
+            Precio = producto.Precio,
+            CantidadEnStock = producto.CantidadEnStock,
+            FechaAlta = producto.FechaAlta,
+            FechaModificacion = producto.FechaModificacion,
+            Activo = producto.Activo,
+            CodigosBarras = producto.CodigosBarras.Select(codigoBarra => new CodigoBarraResponseDto
+            {
+                CodigoBarraId = codigoBarra.Id,
+                Codigo = codigoBarra.Codigo,
+                FechaAlta = codigoBarra.FechaAlta,
+                FechaModificacion = codigoBarra.FechaModificacion,
+                Activo = codigoBarra.Activo
+            }).ToList()
+        };
+    }
+
+    public static SoftDeleteProductoResponseDto ToSoftDeleteProductoResponseDto(this Producto producto)
+    {
+        return new SoftDeleteProductoResponseDto
+        {
+            Id = producto.Id,
+            Nombre = producto.Nombre,
+            Activo = producto.Activo,
+            FechaAlta = producto.FechaAlta,
+            FechaModificacion = producto.FechaModificacion,
+            CodigosBarras = producto.CodigosBarras.Select(codigoBarra => new CodigoBarraResponseDto
+            {
+                CodigoBarraId = codigoBarra.Id,
+                Codigo = codigoBarra.Codigo,
+                Activo = codigoBarra.Activo,
+                FechaAlta = codigoBarra.FechaAlta,
+                FechaModificacion = codigoBarra.FechaModificacion,
+            }).ToList()
+        };
+    }
+
+    public static SoftDeleteProductoCodigoDeBarraResponseDto ToSoftDeleteProductoCodigoDeBarraResponseDto(this Producto producto)
+    {
+        return new SoftDeleteProductoCodigoDeBarraResponseDto
+        {
+            Id = producto.Id,
+            Nombre = producto.Nombre,
+            Activo = producto.Activo,
+            FechaAlta = producto.FechaAlta,
+            FechaModificacion = producto.FechaModificacion,
+            CodigosBarras = producto.CodigosBarras.Where(x => x.Activo == false)
+                                                    .Select(codigoBarra => new CodigoBarraResponseDto
+            {
+                CodigoBarraId = codigoBarra.Id,
+                Codigo = codigoBarra.Codigo,
+                Activo = codigoBarra.Activo,
+                FechaAlta = codigoBarra.FechaAlta,
+                FechaModificacion = codigoBarra.FechaModificacion,
+            }).ToList()
         };
     }
 }

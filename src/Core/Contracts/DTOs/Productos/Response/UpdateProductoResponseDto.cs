@@ -1,10 +1,10 @@
 ﻿using Core.Contracts.DTOs.CodigosBarras.Response;
 
 namespace Core.Contracts.DTOs.Productos.Response;
-public sealed record ProductosResponseDto
+public sealed record UpdateProductoResponseDto
 {
     public int ProductoId { get; set; }
-    public string Nombre { get; set; } = default!;
+    public required string Nombre { get; set; }
     public decimal Precio { get; set; }
     public int CantidadEnStock { get; set; }
     public bool Activo { get; set; }

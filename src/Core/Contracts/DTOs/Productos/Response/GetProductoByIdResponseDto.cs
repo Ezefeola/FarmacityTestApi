@@ -1,7 +1,7 @@
 ﻿using Core.Contracts.DTOs.CodigosBarras.Response;
 
 namespace Core.Contracts.DTOs.Productos.Response;
-public sealed record ProductosResponseDto
+public sealed record GetProductoByIdResponseDto
 {
     public int ProductoId { get; set; }
     public string Nombre { get; set; } = default!;

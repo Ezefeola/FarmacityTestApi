@@ -25,19 +25,24 @@ public class CreateProductValidator : AbstractValidator<CreateProductoRequestDto
         RuleFor(x => x.CodigosBarras)
             .NotNull()
                 .WithMessage(ValidationMessages.NOT_EMPTY)
-            .Must(list => list.Any())
+            .Must(codigosBarras => codigosBarras.Count > 0)
                 .WithMessage(ValidationMessages.NOT_EMPTY)
-            .Must(list => list
-                .Select(cb => cb.Codigo.Trim())
-                .Where(c => !string.IsNullOrWhiteSpace(c))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Count() == list.Count)
-            .WithMessage(ValidationMessages.Producto.CODIGO_BARRA_CANT_BE_DUPLICATED);
+            .Must(codigosBarras =>
+            {
+                List<string> validatedCodigosBarras = codigosBarras
+                                                .Where(x => !string.IsNullOrWhiteSpace(x?.Codigo))
+                                                .Select(x => x!.Codigo!.Trim().ToLowerInvariant())
+                                                .ToList();
+
+                bool isValid = validatedCodigosBarras.Distinct().Count() == validatedCodigosBarras.Count;
+                return isValid;
+            })
+                .WithMessage(ValidationMessages.Producto.CODIGO_BARRA_CANT_BE_DUPLICATED);
 
         RuleForEach(x => x.CodigosBarras)
             .ChildRules(codigo =>
             {
-                codigo.RuleFor(c => c.Codigo)
+                codigo.RuleFor(x => x.Codigo)
                     .NotEmpty()
                         .WithMessage(ValidationMessages.NOT_EMPTY)
                     .MaximumLength(CodigoBarra.Rules.CODIGO_MAX_LENGTH)

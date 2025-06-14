@@ -17,8 +17,7 @@ public class CodigoBarraConfiguration : EntityTypeBaseConfiguration<CodigoBarra>
     {
         builder.Property(x => x.Codigo)
                .HasMaxLength(CodigoBarra.Rules.CODIGO_MAX_LENGTH);
-        builder.HasIndex(x => x.Codigo)
-               .IsUnique();
+        builder.HasIndex(x => x.Codigo);
 
         BaseEntityConfig.ApplyTo<CodigoBarra, int>(builder);
     }

@@ -24,7 +24,11 @@ public static class ServiceCollectionExtensions
     }
     private static void AddProductoUseCases(this IServiceCollection services)
     {
-        services.AddScoped<ICreateProducto, CreateProducto>()
-                .AddScoped<IGetProductos, GetProductos>();
+        services.AddScoped<IGetProductos, GetProductos>()
+                .AddScoped<IGetProductoById, GetProductoById>()
+                .AddScoped<ICreateProducto, CreateProducto>()
+                .AddScoped<IUpdateProducto, UpdateProducto>()
+                .AddScoped<ISoftDeleteProducto, SoftDeleteProducto>()
+                .AddScoped<ISoftDeleteProductoCodigoBarra, SoftDeleteProductoCodigosBarras>();
     }
 }

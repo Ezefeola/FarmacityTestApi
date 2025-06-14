@@ -30,4 +30,37 @@ public class ProductoRepository : GenericRepository<Producto, int>, IProductoRep
         return await Query()
                     .CountAsync();
     }
+
+    public async Task<Producto?> GetProductoByIdWithCodigosBarrasAsync(int productoId, CancellationToken cancellationToken)
+    {
+        return await Query()
+                     .IgnoreQueryFilters()
+                     .Include(x => x.CodigosBarras)
+                     .FirstOrDefaultAsync(x => x.Id == productoId, cancellationToken);
+    }
+
+    public async Task<Producto?> GetProductoByIdWithCodigosBarras(int productoId, CancellationToken cancellationToken)
+    {
+        return await Query()
+                    .Where(x => x.Id == productoId)
+                    .Include(x => x.CodigosBarras)
+                    .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<Producto?> GetProductoActivoByIdWithCodigoBarraAsync(int productoId, CancellationToken cancellationToken)
+    {
+        return await Query()
+                     .Include(x => x.CodigosBarras)
+                     .FirstOrDefaultAsync(x => x.Id == productoId, cancellationToken);
+    }
+
+    public async Task<bool> ProductoNombreActivoExistsAsync(string productoNombre, CancellationToken cancellationToken)
+    {
+        string normalizedNombre = productoNombre.Trim().ToLowerInvariant();
+        return await Query()
+                     .AsNoTracking()
+                     .AnyAsync(x => x.Nombre.Trim().ToLower() == normalizedNombre, 
+                        cancellationToken
+                     );
+    }
 }

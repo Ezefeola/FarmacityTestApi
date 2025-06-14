@@ -13,7 +13,7 @@ public class CreateProductoEndpoint : IEndpoint<ProductoEndpointsGroup>
     {
         return app.MapPost("/", CreateProductoHandler)
                   .WithName("CreateProducto")
-                  .Produces<CreateProductoResponseDto>(StatusCodes.Status200OK)
+                  .Produces<CreateProductoResponseDto>(StatusCodes.Status201Created)
                   .ProducesProblem(StatusCodes.Status400BadRequest)
                   .WithSummary("Create Producto")
                   .WithDescription("Create Producto");
