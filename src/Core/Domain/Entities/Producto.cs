@@ -4,6 +4,24 @@ using Core.Domain.Abstractions;
 namespace Core.Domain.Entities;
 public class Producto : Entity<int>
 {
+    public Producto() { }
+    public Producto(
+        int id, 
+        string nombre, 
+        decimal precio, 
+        int cantidadEnStock, 
+        bool activo, 
+        DateTime? fechaAlta = null
+    )
+    {
+        Id = id;
+        Nombre = nombre;
+        Precio = precio;
+        CantidadEnStock = cantidadEnStock;
+        Activo = activo;
+        FechaAlta = fechaAlta ?? DateTime.UtcNow;
+        CodigosBarras = [];
+    }
     public static class Rules
     {
         public const int NOMBRE_MAX_LENGTH = 255;

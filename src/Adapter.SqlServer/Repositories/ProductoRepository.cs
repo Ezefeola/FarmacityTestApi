@@ -3,7 +3,9 @@ using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.Repositories;
 using Core.Domain.Entities;
 using Core.Utilities.QueryOptions;
+using Core.Utilities.QueryOptions.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Adapter.SqlServer.Repositories;
 public class ProductoRepository : GenericRepository<Producto, int>, IProductoRepository
@@ -15,14 +17,30 @@ public class ProductoRepository : GenericRepository<Producto, int>, IProductoRep
         CancellationToken cancellationToken
     )
     {
-        return await Query()
-                    .AsNoTracking()
-                    .Include(x => x.CodigosBarras)
-                    .ApplyPagination(
-                        parametersRequestDto.GetPage(),
-                        parametersRequestDto.GetPageSize()
-                    )
-                    .ToListAsync(cancellationToken);
+        IQueryable<Producto> getAllProductosQuery = Query()
+                                                    .AsNoTracking()
+                                                    .Include(x => x.CodigosBarras);
+
+        Expression<Func<Producto, object>> sortFieldSelector = parametersRequestDto.SortColumn?.ToLower() switch
+        {
+            "nombre" => producto => producto.Nombre,
+            "precio" => producto => producto.Precio,
+            "fechaalta" => producto => producto.FechaAlta,
+            _ => producto => producto.Id
+        };
+        if(parametersRequestDto.SortDescending == true)
+        {
+            getAllProductosQuery = getAllProductosQuery.OrderByDescending(sortFieldSelector);
+        }
+        else
+        {
+            getAllProductosQuery = getAllProductosQuery.OrderBy(sortFieldSelector);
+        }
+
+            return await getAllProductosQuery
+                                    .ApplyFilteringToGetProductos(parametersRequestDto)
+                                    .ApplyPagination(parametersRequestDto.GetPage(), parametersRequestDto.GetPageSize())
+                                    .ToListAsync(cancellationToken);
     }
 
     public async Task<int> GetProductosCountAsync(CancellationToken cancellationToken)

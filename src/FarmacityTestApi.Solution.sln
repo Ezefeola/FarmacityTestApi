@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapter.SqlServer", "Adapte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapter.Api", "Adapter.Api\Adapter.Api.csproj", "{6A1E2B50-80D9-46B4-81F7-BD6EC9D2C81F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{40E5BD14-A2BF-497B-A9B4-691DB5EF92F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6A1E2B50-80D9-46B4-81F7-BD6EC9D2C81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A1E2B50-80D9-46B4-81F7-BD6EC9D2C81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A1E2B50-80D9-46B4-81F7-BD6EC9D2C81F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40E5BD14-A2BF-497B-A9B4-691DB5EF92F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40E5BD14-A2BF-497B-A9B4-691DB5EF92F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40E5BD14-A2BF-497B-A9B4-691DB5EF92F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40E5BD14-A2BF-497B-A9B4-691DB5EF92F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

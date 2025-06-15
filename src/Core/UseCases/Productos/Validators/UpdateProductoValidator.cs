@@ -31,17 +31,17 @@ public class UpdateProductoValidator : AbstractValidator<UpdateProductoRequestDt
                     .WithMessage(ValidationMessages.Producto.CANTIDAD_DE_STOCK_NOT_NEGATIVE);
         });
 
-        When(x => x.CodigosBarras is not null, () =>
+        When(x => x.CodigosBarras.Count > 0, () =>
         {
-            RuleForEach(x => x.CodigosBarras!)
-               .ChildRules(codigo =>
-               {
-                   codigo.RuleFor(c => c.Codigo)
-                       .NotEmpty()
-                           .WithMessage(ValidationMessages.NOT_EMPTY)
-                       .MaximumLength(CodigoBarra.Rules.CODIGO_MAX_LENGTH)
-                           .WithMessage(ValidationMessages.MAX_LENGTH);
-               });
+            RuleForEach(x => x.CodigosBarras)
+                .ChildRules(codigo =>
+                {
+                    codigo.RuleFor(c => c.Codigo)
+                        .NotEmpty()
+                            .WithMessage(ValidationMessages.NOT_EMPTY)
+                        .MaximumLength(CodigoBarra.Rules.CODIGO_MAX_LENGTH)
+                            .WithMessage(ValidationMessages.MAX_LENGTH);
+                });
         });
     }
 }

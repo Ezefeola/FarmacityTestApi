@@ -1,4 +1,4 @@
-﻿namespace Core.Utilities.QueryOptions;
+﻿namespace Core.Utilities.QueryOptions.QueryableExtensions;
 public static class QueryableExtensions
 {
     public static IQueryable<T> ApplyPagination<T>(

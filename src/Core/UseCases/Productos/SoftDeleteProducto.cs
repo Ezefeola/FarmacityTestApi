@@ -1,4 +1,5 @@
 ﻿using Core.Contracts.DTOs.Productos.Response;
+using Core.Contracts.Models;
 using Core.Contracts.Result;
 using Core.Contracts.UnitOfWork;
 using Core.Contracts.UseCases.Productos;
@@ -30,7 +31,12 @@ public class SoftDeleteProducto : ISoftDeleteProducto
         }
 
         producto.SoftDelete();
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        SaveResult saveResult = await _unitOfWork.CompleteAsync(cancellationToken);
+        if (!saveResult.IsSuccess)
+        {
+            return Result<SoftDeleteProductoResponseDto>.Failure(HttpStatusCode.InternalServerError)
+                                                        .WithErrors([saveResult.ErrorMessage]);
+        }
 
         SoftDeleteProductoResponseDto responseDto = producto.ToSoftDeleteProductoResponseDto();
         return Result<SoftDeleteProductoResponseDto>.Success(HttpStatusCode.OK)

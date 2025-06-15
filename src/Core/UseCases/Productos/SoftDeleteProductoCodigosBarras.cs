@@ -1,5 +1,6 @@
 ﻿using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
+using Core.Contracts.Models;
 using Core.Contracts.Result;
 using Core.Contracts.UnitOfWork;
 using Core.Contracts.UseCases.Productos;
@@ -62,7 +63,12 @@ public class SoftDeleteProductoCodigosBarras : ISoftDeleteProductoCodigoBarra
         {
             codigoBarra.SoftDelete();
         }
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        SaveResult saveResult = await _unitOfWork.CompleteAsync(cancellationToken);
+        if (!saveResult.IsSuccess)
+        {
+            return Result<SoftDeleteProductoCodigoDeBarraResponseDto>.Failure(HttpStatusCode.InternalServerError)
+                                                                     .WithErrors([saveResult.ErrorMessage]);
+        }
 
         SoftDeleteProductoCodigoDeBarraResponseDto responseDto = producto.ToSoftDeleteProductoCodigoDeBarraResponseDto();
         return Result<SoftDeleteProductoCodigoDeBarraResponseDto>.Success(HttpStatusCode.OK)

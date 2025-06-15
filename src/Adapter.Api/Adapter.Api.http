@@ -1,6 +1,6 @@
-@Adapter.Api_HostAddress = http://localhost:5244
+@Adapter.Api_HostAddress = http://localhost:5244/api
 
-GET {{Adapter.Api_HostAddress}}/weatherforecast/
+GET {{Adapter.Api_HostAddress}}/producto/
 Accept: application/json
 
 ###

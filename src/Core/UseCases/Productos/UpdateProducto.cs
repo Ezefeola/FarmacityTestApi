@@ -1,5 +1,6 @@
 ﻿using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
+using Core.Contracts.Models;
 using Core.Contracts.Result;
 using Core.Contracts.UnitOfWork;
 using Core.Contracts.UseCases.Productos;
@@ -87,7 +88,12 @@ public class UpdateProducto : IUpdateProducto
             }
         }
         producto.UpdateIfChanged(requestDto, newCodigosBarras);
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        SaveResult saveResult = await _unitOfWork.CompleteAsync(cancellationToken);
+        if (!saveResult.IsSuccess)
+        {
+            return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.InternalServerError)
+                                                    .WithErrors([saveResult.ErrorMessage]);
+        }
 
         UpdateProductoResponseDto responseDto = producto.ToUpdateProductoResponseDto();
         return Result<UpdateProductoResponseDto>.Success(HttpStatusCode.OK)

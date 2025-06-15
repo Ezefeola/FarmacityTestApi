@@ -1,9 +1,23 @@
 ﻿using Core.Domain.Abstractions;
-using static Core.Utilities.Validations.ValidationMessages;
 
 namespace Core.Domain.Entities;
 public class CodigoBarra : Entity<int>
 {
+    public CodigoBarra() { }
+    public CodigoBarra(
+        int id,
+        string codigo,
+        bool activo,
+        DateTime fechaAlta,
+        DateTime? fechaModificacion = null
+    )
+    {
+        Id = id;
+        Codigo = codigo;
+        Activo = activo;
+        FechaAlta = fechaAlta;
+        FechaModificacion = fechaModificacion;
+    }
     public static class Rules
     {
         public const int CODIGO_MAX_LENGTH = 255;

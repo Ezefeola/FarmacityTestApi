@@ -1,5 +1,6 @@
 ﻿using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
+using Core.Contracts.Models;
 using Core.Contracts.Result;
 using Core.Contracts.UnitOfWork;
 using Core.Contracts.UseCases.Productos;
@@ -54,7 +55,7 @@ public class CreateProducto : ICreateProducto
             bool exists = await _unitOfWork.CodigoBarraRepository.CodigoBarraActivoExistsAsync(codigoBarra, cancellationToken);
             if (exists)
             {
-                return Result<CreateProductoResponseDto>.Success(HttpStatusCode.BadRequest)
+                return Result<CreateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
                                                         .WithErrors([
                                                             $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} " +
                                                             $"(CODIGO_BARRA: {codigoBarra})"
@@ -64,7 +65,12 @@ public class CreateProducto : ICreateProducto
 
         Producto producto = requestDto.ToEntity(codigosBarras);
         await _unitOfWork.ProductoRepository.AddAsync(producto, cancellationToken);
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        SaveResult saveResult = await _unitOfWork.CompleteAsync(cancellationToken);
+        if (!saveResult.IsSuccess)
+        {
+            return Result<CreateProductoResponseDto>.Failure(HttpStatusCode.InternalServerError)
+                                                    .WithErrors([saveResult.ErrorMessage]);
+        }
 
         CreateProductoResponseDto responseDto = producto.ToCreateProductoResponseDto();
         return Result<CreateProductoResponseDto>.Success(HttpStatusCode.Created)
