@@ -22,7 +22,7 @@ public class GetProductoById : IGetProductoById
         CancellationToken cancellationToken
     )
     {
-        Producto? producto = await _unitOfWork.ProductoRepository.GetProductoByIdWithCodigosBarras(productoId, cancellationToken);
+        Producto? producto = await _unitOfWork.ProductoRepository.GetProductoActivoByIdWithCodigosBarrasAsync(productoId, cancellationToken);
         if (producto is null)
         {
             return Result<GetProductoByIdResponseDto>.Failure(HttpStatusCode.NotFound)

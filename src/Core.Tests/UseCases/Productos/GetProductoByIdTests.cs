@@ -3,27 +3,16 @@ using Core.Contracts.Repositories;
 using Core.Contracts.Result;
 using Core.Contracts.UnitOfWork;
 using Core.Domain.Entities;
+using Core.Tests.Abstractions;
 using Core.UseCases.Productos;
 using Moq;
 using System.Net;
 
 namespace Core.Tests.UseCases.Productos;
-public class GetProductoByIdTests
+public class GetProductoByIdTests : UseCaseTestBase<GetProductoById>
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IProductoRepository> _productoRepositoryMock;
-    private readonly GetProductoById _useCase;
+    public GetProductoByIdTests() : base(unitOfWork => new GetProductoById(unitOfWork)) { }
 
-    public GetProductoByIdTests()
-    {
-        _productoRepositoryMock = new Mock<IProductoRepository>();
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        _unitOfWorkMock.Setup(x => x.ProductoRepository)
-                       .Returns(_productoRepositoryMock.Object);
-
-        _useCase = new GetProductoById(_unitOfWorkMock.Object);
-    }
 
     [Fact]
     public async Task Should_Return_Producto_When_Exists()
@@ -38,11 +27,11 @@ public class GetProductoByIdTests
             fechaAlta : DateTime.UtcNow
         );
 
-        _productoRepositoryMock
-            .Setup(x => x.GetProductoByIdWithCodigosBarras(productoId, default))
+        ProductoRepositoryMock
+            .Setup(x => x.GetProductoActivoByIdWithCodigosBarrasAsync(productoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(producto);
 
-        Result<GetProductoByIdResponseDto> result = await _useCase.ExecuteAsync(productoId, default);
+        Result<GetProductoByIdResponseDto> result = await UseCase.ExecuteAsync(productoId, default);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Payload);
@@ -55,11 +44,11 @@ public class GetProductoByIdTests
     {
         int productoId = 42;
 
-        _productoRepositoryMock
-            .Setup(x => x.GetProductoByIdWithCodigosBarras(productoId, default))
+        ProductoRepositoryMock
+            .Setup(x => x.GetProductoActivoByIdWithCodigosBarrasAsync(productoId, default))
             .ReturnsAsync((Producto?)null);
 
-        Result<GetProductoByIdResponseDto> result = await _useCase.ExecuteAsync(productoId, default);
+        Result<GetProductoByIdResponseDto> result = await UseCase.ExecuteAsync(productoId, default);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Payload);

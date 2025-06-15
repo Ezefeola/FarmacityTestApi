@@ -32,7 +32,7 @@ public class SoftDeleteProductoCodigosBarras : ISoftDeleteProductoCodigoBarra
         }
 
         Producto? producto = await _unitOfWork.ProductoRepository
-                                                    .GetProductoActivoByIdWithCodigoBarraAsync
+                                                    .GetProductoActivoByIdWithCodigosBarrasAsync
                                                     (
                                                         productoId, cancellationToken
                                                     );

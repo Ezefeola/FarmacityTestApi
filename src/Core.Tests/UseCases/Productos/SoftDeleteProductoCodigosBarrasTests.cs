@@ -1,30 +1,17 @@
 ﻿using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
 using Core.Contracts.Models;
-using Core.Contracts.Repositories;
 using Core.Contracts.Result;
-using Core.Contracts.UnitOfWork;
 using Core.Domain.Entities;
+using Core.Tests.Abstractions;
 using Core.UseCases.Productos;
 using Moq;
 using System.Net;
 
 namespace Core.Tests.UseCases.Productos;
-public class SoftDeleteProductoCodigosBarrasTests
+public class SoftDeleteProductoCodigosBarrasTests : UseCaseTestBase<SoftDeleteProductoCodigosBarras>
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IProductoRepository> _productoRepositoryMock;
-    private readonly SoftDeleteProductoCodigosBarras _useCase;
-
-    public SoftDeleteProductoCodigosBarrasTests()
-    {
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _productoRepositoryMock = new Mock<IProductoRepository>();
-
-        _unitOfWorkMock.Setup(u => u.ProductoRepository).Returns(_productoRepositoryMock.Object);
-
-        _useCase = new SoftDeleteProductoCodigosBarras(_unitOfWorkMock.Object);
-    }
+    public SoftDeleteProductoCodigosBarrasTests() : base(unitOfWork => new SoftDeleteProductoCodigosBarras(unitOfWork)) { }
 
     [Fact]
     public async Task ExecuteAsync_Should_Return_Success_When_CodigosBarras_Are_SoftDeleted()
@@ -70,15 +57,15 @@ public class SoftDeleteProductoCodigosBarrasTests
             ]
         };
 
-        _productoRepositoryMock
-            .Setup(r => r.GetProductoActivoByIdWithCodigoBarraAsync(productoId, It.IsAny<CancellationToken>()))
+        ProductoRepositoryMock
+            .Setup(r => r.GetProductoActivoByIdWithCodigosBarrasAsync(productoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(producto);
 
-        _unitOfWorkMock
+        UnitOfWorkMock
             .Setup(u => u.CompleteAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SaveResult { IsSuccess = true, RowsAffected = 2 });
 
-        Result<SoftDeleteProductoCodigoDeBarraResponseDto> result =await _useCase.ExecuteAsync(productoId, requestDto, default);
+        Result<SoftDeleteProductoCodigoDeBarraResponseDto> result =await UseCase.ExecuteAsync(productoId, requestDto, default);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(HttpStatusCode.OK, result.HttpStatusCode);

@@ -57,17 +57,10 @@ public class ProductoRepository : GenericRepository<Producto, int>, IProductoRep
                      .FirstOrDefaultAsync(x => x.Id == productoId, cancellationToken);
     }
 
-    public async Task<Producto?> GetProductoByIdWithCodigosBarras(int productoId, CancellationToken cancellationToken)
+    public async Task<Producto?> GetProductoActivoByIdWithCodigosBarrasAsync(int productoId, CancellationToken cancellationToken)
     {
         return await Query()
-                    .Where(x => x.Id == productoId)
-                    .Include(x => x.CodigosBarras)
-                    .FirstOrDefaultAsync(cancellationToken);
-    }
-
-    public async Task<Producto?> GetProductoActivoByIdWithCodigoBarraAsync(int productoId, CancellationToken cancellationToken)
-    {
-        return await Query()
+                     .Where(x => x.Id == productoId)
                      .Include(x => x.CodigosBarras)
                      .FirstOrDefaultAsync(x => x.Id == productoId, cancellationToken);
     }

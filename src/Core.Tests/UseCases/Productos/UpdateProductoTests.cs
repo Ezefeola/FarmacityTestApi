@@ -2,36 +2,20 @@
 using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
 using Core.Contracts.Models;
-using Core.Contracts.Repositories;
 using Core.Contracts.Result;
-using Core.Contracts.UnitOfWork;
 using Core.Domain.Entities;
+using Core.Tests.Abstractions;
 using Core.UseCases.Productos;
-using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using System.Net;
 
 namespace Core.Tests.UseCases.Productos;
-public class UpdateProductoTests
+public class UpdateProductoTests : UseCaseTestBase<UpdateProducto, UpdateProductoRequestDto>
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IValidator<UpdateProductoRequestDto>> _validatorMock;
-    private readonly Mock<IProductoRepository> _productoRepositoryMock;
-    private readonly Mock<ICodigoBarraRepository> _codigoBarraRepositoryMock;
-    private readonly UpdateProducto _useCase;
 
-    public UpdateProductoTests()
+    public UpdateProductoTests() : base((unitOfWork, validator) => new UpdateProducto(unitOfWork, validator))
     {
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _validatorMock = new Mock<IValidator<UpdateProductoRequestDto>>();
-        _productoRepositoryMock = new Mock<IProductoRepository>();
-        _codigoBarraRepositoryMock = new Mock<ICodigoBarraRepository>();
-
-        _unitOfWorkMock.SetupGet(u => u.ProductoRepository).Returns(_productoRepositoryMock.Object);
-        _unitOfWorkMock.SetupGet(u => u.CodigoBarraRepository).Returns(_codigoBarraRepositoryMock.Object);
-
-        _useCase = new UpdateProducto(_unitOfWorkMock.Object, _validatorMock.Object);
     }
 
     [Fact]
@@ -78,27 +62,27 @@ public class UpdateProductoTests
         new CodigoBarra(id: 2, codigo: "ABC123", activo: false, fechaAlta: DateTime.UtcNow)
     };
 
-        _validatorMock
+        ValidatorMock
             .Setup(v => v.Validate(requestDto))
             .Returns(new ValidationResult());
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.GetProductoByIdWithCodigosBarrasAsync(productoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(producto);
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.ProductoNombreActivoExistsAsync(requestDto.Nombre, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _codigoBarraRepositoryMock
+        CodigoBarraRepositoryMock
             .Setup(r => r.GetExistingCodigosBarrasAsync(productoId, It.IsAny<List<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingCodigosBarras);
 
-        _unitOfWorkMock
+        UnitOfWorkMock
             .Setup(u => u.CompleteAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SaveResult { IsSuccess = true });
 
-        Result<UpdateProductoResponseDto> result = await _useCase.ExecuteAsync(productoId, requestDto, CancellationToken.None);
+        Result<UpdateProductoResponseDto> result = await UseCase.ExecuteAsync(productoId, requestDto, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(HttpStatusCode.OK, result.HttpStatusCode);

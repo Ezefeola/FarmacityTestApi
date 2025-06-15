@@ -2,37 +2,22 @@
 using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
 using Core.Contracts.Models;
-using Core.Contracts.Repositories;
 using Core.Contracts.Result;
-using Core.Contracts.UnitOfWork;
 using Core.Domain.Entities;
+using Core.Tests.Abstractions;
 using Core.UseCases.Productos;
 using Core.Utilities.Validations;
-using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using System.Net;
 
 namespace Core.Tests.UseCases.Productos;
-public class CreateProductoTests
+
+public class CreateProductoTests : UseCaseTestBase<CreateProducto, CreateProductoRequestDto>
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IProductoRepository> _productoRepositoryMock;
-    private readonly Mock<ICodigoBarraRepository> _codigoBarraRepositoryMock;
-    private readonly Mock<IValidator<CreateProductoRequestDto>> _validatorMock;
-    private readonly CreateProducto _useCase;
 
-    public CreateProductoTests()
+    public CreateProductoTests() : base((unitOfWork, validator) => new CreateProducto(unitOfWork, validator))
     {
-        _productoRepositoryMock = new Mock<IProductoRepository>();
-        _codigoBarraRepositoryMock = new Mock<ICodigoBarraRepository>();
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _validatorMock = new Mock<IValidator<CreateProductoRequestDto>>();
-
-        _unitOfWorkMock.Setup(u => u.ProductoRepository).Returns(_productoRepositoryMock.Object);
-        _unitOfWorkMock.Setup(u => u.CodigoBarraRepository).Returns(_codigoBarraRepositoryMock.Object);
-
-        _useCase = new CreateProducto(_unitOfWorkMock.Object, _validatorMock.Object);
     }
 
     [Fact]
@@ -48,9 +33,9 @@ public class CreateProductoTests
             new ValidationFailure("Nombre", "Nombre no puede estar vacío")
         };
 
-        _validatorMock.Setup(v => v.Validate(request)).Returns(new ValidationResult(failures));
+        ValidatorMock.Setup(v => v.Validate(request)).Returns(new ValidationResult(failures));
 
-        var result = await _useCase.ExecuteAsync(request, default);
+        Result<CreateProductoResponseDto> result = await UseCase.ExecuteAsync(request, default);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.BadRequest, result.HttpStatusCode);
@@ -68,15 +53,15 @@ public class CreateProductoTests
             CantidadEnStock = 5,
             CodigosBarras = []
         };
-        _validatorMock.Setup(v => v.Validate(It.IsAny<CreateProductoRequestDto>()))
+        ValidatorMock.Setup(v => v.Validate(It.IsAny<CreateProductoRequestDto>()))
               .Returns(new ValidationResult());
 
-        _unitOfWorkMock.Setup(u => u.ProductoRepository.ProductoNombreActivoExistsAsync(
+        UnitOfWorkMock.Setup(u => u.ProductoRepository.ProductoNombreActivoExistsAsync(
             requestDto.Nombre,
             It.IsAny<CancellationToken>()
         )).ReturnsAsync(true);
 
-        var result = await _useCase.ExecuteAsync(requestDto, default);
+        Result<CreateProductoResponseDto> result = await UseCase.ExecuteAsync(requestDto, default);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.BadRequest, result.HttpStatusCode);
@@ -97,22 +82,22 @@ public class CreateProductoTests
             ]
         };
 
-        _validatorMock.Setup(v => v.Validate(It.IsAny<CreateProductoRequestDto>()))
+        ValidatorMock.Setup(v => v.Validate(It.IsAny<CreateProductoRequestDto>()))
                       .Returns(new ValidationResult());
 
-        _productoRepositoryMock.Setup(r => r.ProductoNombreActivoExistsAsync(
+        ProductoRepositoryMock.Setup(r => r.ProductoNombreActivoExistsAsync(
             requestDto.Nombre, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _codigoBarraRepositoryMock.Setup(r => r.CodigoBarraActivoExistsAsync(
+        CodigoBarraRepositoryMock.Setup(r => r.CodigoBarraActivoExistsAsync(
             "12345", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        _codigoBarraRepositoryMock.Setup(r => r.CodigoBarraActivoExistsAsync(
+        CodigoBarraRepositoryMock.Setup(r => r.CodigoBarraActivoExistsAsync(
             "67890", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        Result<CreateProductoResponseDto> result = await _useCase.ExecuteAsync(requestDto, default);
+        Result<CreateProductoResponseDto> result = await UseCase.ExecuteAsync(requestDto, default);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.BadRequest, result.HttpStatusCode);
@@ -122,7 +107,7 @@ public class CreateProductoTests
     [Fact]
     public async Task Should_Create_Producto_When_Data_Is_Valid()
     {
-        var request = new CreateProductoRequestDto
+        CreateProductoRequestDto request = new()
         {
             Nombre = "ProductoNuevo",
             Precio = 50,
@@ -135,18 +120,18 @@ public class CreateProductoTests
             ]
         };
 
-        _validatorMock.Setup(v => v.Validate(request)).Returns(new ValidationResult());
+        ValidatorMock.Setup(v => v.Validate(request)).Returns(new ValidationResult());
 
-        _productoRepositoryMock.Setup(r => r.ProductoNombreActivoExistsAsync(request.Nombre, default))
+        ProductoRepositoryMock.Setup(r => r.ProductoNombreActivoExistsAsync(request.Nombre, default))
                               .ReturnsAsync(false);
 
-        _codigoBarraRepositoryMock.Setup(r => r.CodigoBarraActivoExistsAsync(It.IsAny<string>(), default))
+        CodigoBarraRepositoryMock.Setup(r => r.CodigoBarraActivoExistsAsync(It.IsAny<string>(), default))
                                  .ReturnsAsync(false);
 
-        _productoRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Producto>(), default))
+        ProductoRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Producto>(), default))
                               .Returns(Task.CompletedTask);
 
-        _unitOfWorkMock.Setup(u => u.CompleteAsync(It.IsAny<CancellationToken>()))
+        UnitOfWorkMock.Setup(u => u.CompleteAsync(It.IsAny<CancellationToken>()))
                        .ReturnsAsync(new SaveResult
                        {
                            IsSuccess = true,
@@ -154,14 +139,14 @@ public class CreateProductoTests
                            ErrorMessage = null
                        });
 
-        var result = await _useCase.ExecuteAsync(request, default);
+        Result<CreateProductoResponseDto> result = await UseCase.ExecuteAsync(request, default);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(HttpStatusCode.Created, result.HttpStatusCode);
         Assert.NotNull(result.Payload);
         Assert.Equal(request.Nombre, result.Payload.Nombre);
 
-        _productoRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Producto>(), default), Times.Once);
-        _unitOfWorkMock.Verify(u => u.CompleteAsync(default), Times.Once);
+        ProductoRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Producto>(), default), Times.Once);
+        UnitOfWorkMock.Verify(u => u.CompleteAsync(default), Times.Once);
     }
 }

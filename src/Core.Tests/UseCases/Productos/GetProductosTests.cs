@@ -1,31 +1,17 @@
 ﻿using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
-using Core.Contracts.Repositories;
 using Core.Contracts.Result;
-using Core.Contracts.UnitOfWork;
 using Core.Domain.Entities;
+using Core.Tests.Abstractions;
 using Core.UseCases.Productos;
 using Core.Utilities.Validations;
 using Moq;
 using System.Net;
 
 namespace Core.Tests.UseCases.Productos;
-public class GetProductosTests
+public class GetProductosTests : UseCaseTestBase<GetProductos>
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IProductoRepository> _productoRepositoryMock;
-    private readonly GetProductos _useCase;
-
-    public GetProductosTests()
-    {
-        _productoRepositoryMock = new Mock<IProductoRepository>();
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        _unitOfWorkMock.Setup(u => u.ProductoRepository)
-                       .Returns(_productoRepositoryMock.Object);
-
-        _useCase = new GetProductos(_unitOfWorkMock.Object);
-    }
+    public GetProductosTests() : base(unitOfWork => new GetProductos(unitOfWork)) { }
 
     [Fact]
     public async Task ExecuteAsync_Should_Return_Success_When_Productos_Exist()
@@ -66,15 +52,15 @@ public class GetProductosTests
             }
         ];
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.GetAllProductosAsync(requestDto, It.IsAny<CancellationToken>()))
             .ReturnsAsync(productos);
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.GetProductosCountAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(productos.Count);
 
-        Result<GetProductosResponseDto> result = await _useCase.ExecuteAsync(requestDto, default);
+        Result<GetProductosResponseDto> result = await UseCase.ExecuteAsync(requestDto, default);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(HttpStatusCode.OK, result.HttpStatusCode);
@@ -93,11 +79,11 @@ public class GetProductosTests
     {
         GetProductosRequestDto requestDto = new();
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
                 .Setup(x => x.GetAllProductosAsync(requestDto, It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult<IEnumerable<Producto>>(null!));
 
-        Result<GetProductosResponseDto> result = await _useCase.ExecuteAsync(requestDto, default);
+        Result<GetProductosResponseDto> result = await UseCase.ExecuteAsync(requestDto, default);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.NotFound, result.HttpStatusCode);

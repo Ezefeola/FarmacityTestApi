@@ -1,30 +1,17 @@
 ﻿using Core.Contracts.DTOs.Productos.Response;
 using Core.Contracts.Models;
-using Core.Contracts.Repositories;
 using Core.Contracts.Result;
-using Core.Contracts.UnitOfWork;
 using Core.Domain.Entities;
+using Core.Tests.Abstractions;
 using Core.UseCases.Productos;
 using Core.Utilities.Validations;
 using Moq;
 using System.Net;
 
 namespace Core.Tests.UseCases.Productos;
-public class SoftDeleteProductoTests
+public class SoftDeleteProductoTests : UseCaseTestBase<SoftDeleteProducto>
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IProductoRepository> _productoRepositoryMock;
-    private readonly SoftDeleteProducto _useCase;
-
-    public SoftDeleteProductoTests()
-    {
-        _productoRepositoryMock = new Mock<IProductoRepository>();
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        _unitOfWorkMock.Setup(u => u.ProductoRepository).Returns(_productoRepositoryMock.Object);
-
-        _useCase = new SoftDeleteProducto(_unitOfWorkMock.Object);
-    }
+    public SoftDeleteProductoTests() : base(unitOfWork => new SoftDeleteProducto(unitOfWork)) { }
 
     [Fact]
     public async Task Should_Return_Success_When_Producto_Exists()
@@ -51,15 +38,15 @@ public class SoftDeleteProductoTests
             ]
         };
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.GetProductoByIdWithCodigosBarrasAsync(productoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(producto);
 
-        _unitOfWorkMock
+        UnitOfWorkMock
             .Setup(u => u.CompleteAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SaveResult { IsSuccess = true, RowsAffected = 1 });
 
-        Result<SoftDeleteProductoResponseDto> result = await _useCase.ExecuteAsync(productoId, default);
+        Result<SoftDeleteProductoResponseDto> result = await UseCase.ExecuteAsync(productoId, default);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(HttpStatusCode.OK, result.HttpStatusCode);
@@ -71,17 +58,14 @@ public class SoftDeleteProductoTests
     [Fact]
     public async Task Should_Return_NotFound_When_Producto_Does_Not_Exist()
     {
-        // Arrange
         int productoId = 99;
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.GetProductoByIdWithCodigosBarrasAsync(productoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Producto?)null);
 
-        // Act
-        Result<SoftDeleteProductoResponseDto> result = await _useCase.ExecuteAsync(productoId, default);
+        Result<SoftDeleteProductoResponseDto> result = await UseCase.ExecuteAsync(productoId, default);
 
-        // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.NotFound, result.HttpStatusCode);
         Assert.Contains(ValidationMessages.Producto.PRODUCTO_NOT_FOUND, result.Errors[0]);
@@ -101,15 +85,15 @@ public class SoftDeleteProductoTests
             fechaAlta: DateTime.UtcNow
         );
 
-        _productoRepositoryMock
+        ProductoRepositoryMock
             .Setup(r => r.GetProductoByIdWithCodigosBarrasAsync(productoId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(producto);
 
-        _unitOfWorkMock
+        UnitOfWorkMock
             .Setup(u => u.CompleteAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SaveResult { IsSuccess = false, ErrorMessage = "Error de persistencia" });
 
-        Result<SoftDeleteProductoResponseDto> result = await _useCase.ExecuteAsync(productoId, default);
+        Result<SoftDeleteProductoResponseDto> result = await UseCase.ExecuteAsync(productoId, default);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.InternalServerError, result.HttpStatusCode);
