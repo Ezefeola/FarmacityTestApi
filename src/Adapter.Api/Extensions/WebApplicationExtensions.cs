@@ -14,6 +14,7 @@ public static class WebApplicationExtensions
         UseHealthChecksConfig(app);
         UseMapEndpointsConfig(app);
         UseHttpsRedirectionConfig(app);
+        app.UseCors();
     }
 
     private static void UseExtensionHandlerConfig(WebApplication app)
