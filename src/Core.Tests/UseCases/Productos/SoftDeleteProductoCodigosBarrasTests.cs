@@ -17,7 +17,7 @@ public class SoftDeleteProductoCodigosBarrasTests : UseCaseTestBase<SoftDeletePr
     public async Task ExecuteAsync_Should_Return_Success_When_CodigosBarras_Are_SoftDeleted()
     {
         int productoId = 1;
-        List<int> codigosBarrasIdsToDelete = [10, 11];
+        int[] codigosBarrasIdsToDelete = [10, 11];
 
         SoftDeleteProductoCodigoDeBarraRequestDto requestDto = new()
         {

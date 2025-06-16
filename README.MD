@@ -44,9 +44,17 @@ cd FarmacityTestApi
 
 2. ## Running the Project
 Make sure you're in the root of the solution and that the SDK for .NET 8 is installed.
-
 ### Run the API locally
 
 ```bash
 cd src/Adapter.Api
 dotnet run --launch-profile "https"
+```
+
+3. ### Run Api Tests
+Make sure you're in the root of the solution and that the SDK for .NET 8 is installed.
+
+```bash
+cd src/Core.Tests
+dotnet test
+```
