@@ -25,6 +25,15 @@ The solution is organized around Hexagonal Architecture, with clearly separated 
 
 ---
 
+## API Documentation
+This API is documented using OpenAPI. You can explore and test the endpoints interactively via the Scalar UI.
+
+Scalar UI URL: https://localhost:7126/api/scalar/ or http://localhost:5244/api/scalar/
+
+Scalar provides a modern and user-friendly interface to navigate the OpenAPI specification and execute requests directly from the browser.
+
+---
+
 1. ## Clone the project 
 ```bash
 
