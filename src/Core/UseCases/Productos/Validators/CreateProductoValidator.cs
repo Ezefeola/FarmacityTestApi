@@ -22,22 +22,25 @@ public class CreateProductValidator : AbstractValidator<CreateProductoRequestDto
             .GreaterThanOrEqualTo(0)
                 .WithMessage(ValidationMessages.Producto.CANTIDAD_DE_STOCK_NOT_NEGATIVE);
 
-        RuleFor(x => x.CodigosBarras)
-            .NotNull()
-                .WithMessage(ValidationMessages.NOT_EMPTY)
-            .Must(codigosBarras => codigosBarras.Count > 0)
-                .WithMessage(ValidationMessages.NOT_EMPTY)
-            .Must(codigosBarras =>
-            {
-                List<string> validatedCodigosBarras = codigosBarras
-                                                .Where(x => !string.IsNullOrWhiteSpace(x?.Codigo))
-                                                .Select(x => x!.Codigo!.Trim().ToLowerInvariant())
-                                                .ToList();
+        When(x => x.CodigosBarras.Count > 0 && x.CodigosBarras is not null, () =>
+        {
+            RuleFor(x => x.CodigosBarras)
+                .NotNull()
+                    .WithMessage(ValidationMessages.NOT_EMPTY)
+                .Must(codigosBarras => codigosBarras.Count > 0)
+                    .WithMessage(ValidationMessages.NOT_EMPTY)
+                .Must(codigosBarras =>
+                {
+                    List<string> validatedCodigosBarras = codigosBarras
+                                                    .Where(x => !string.IsNullOrWhiteSpace(x?.Codigo))
+                                                    .Select(x => x!.Codigo!.Trim().ToLowerInvariant())
+                                                    .ToList();
 
-                bool isValid = validatedCodigosBarras.Distinct().Count() == validatedCodigosBarras.Count;
-                return isValid;
-            })
-                .WithMessage(ValidationMessages.Producto.CODIGO_BARRA_CANT_BE_DUPLICATED);
+                    bool isValid = validatedCodigosBarras.Distinct().Count() == validatedCodigosBarras.Count;
+                    return isValid;
+                })
+                    .WithMessage(ValidationMessages.Producto.CODIGO_BARRA_CANT_BE_DUPLICATED);
+        });
 
         RuleForEach(x => x.CodigosBarras)
             .ChildRules(codigo =>

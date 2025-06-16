@@ -1,4 +1,5 @@
-﻿using Core.Contracts.DTOs.Productos.Request;
+﻿using Core.Contracts.DTOs.CodigosBarras.Request;
+using Core.Contracts.DTOs.Productos.Request;
 using Core.Contracts.DTOs.Productos.Response;
 using Core.Contracts.Models;
 using Core.Contracts.Result;
@@ -61,12 +62,51 @@ public class UpdateProducto : IUpdateProducto
                                                     ]);
         }
 
-        List<string> newCodigosBarras = requestDto.CodigosBarras.Select(x => x.Codigo.Trim())
-                                                                .ToList();
+        List<UpdateCodigoBarraRequestDto> codigosBarrasToUpdate = requestDto.CodigosBarras
+                                                                                    .Where(x => x.CodigoBarraId.HasValue)
+                                                                                    .ToList();
+        foreach (UpdateCodigoBarraRequestDto codigoBarra in codigosBarrasToUpdate)
+        {
+            CodigoBarra? existingCodigoBarra = producto.CodigosBarras.FirstOrDefault(cb => cb.Id == codigoBarra.CodigoBarraId);
+            if (existingCodigoBarra is null)
+            {
+                    return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
+                                                            .WithErrors([
+                                                                $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_NOT_FOUND}" +
+                                                                $" (CODIGO_BARRA_ID:{codigoBarra.CodigoBarraId})"
+                                                            ]);
+            }
+            if (!existingCodigoBarra.Codigo.Equals(codigoBarra.Codigo, StringComparison.OrdinalIgnoreCase))
+            {
+                bool codigoBarraActivoExists = await _unitOfWork.CodigoBarraRepository.CodigoBarraActivoExistsAsync(codigoBarra.Codigo, cancellationToken);
+                if (codigoBarraActivoExists)
+                {
+                    return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
+                                                            .WithErrors([
+                                                                $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} " +
+                                                                $"(CODIGO: {codigoBarra.Codigo}"
+                                                            ]);
+                }
+
+                existingCodigoBarra.Codigo = codigoBarra.Codigo;
+                existingCodigoBarra.FechaModificacion = DateTime.UtcNow;
+
+                if (!existingCodigoBarra.Activo)
+                {
+                    existingCodigoBarra.Activo = true;
+                    existingCodigoBarra.FechaModificacion = DateTime.UtcNow;
+                }
+            }
+        }
+
+        List<string> newCodigosBarras = requestDto.CodigosBarras
+                                                            .Where(x => !x.CodigoBarraId.HasValue)
+                                                            .Select(x => x.Codigo.Trim())
+                                                            .ToList();
         IEnumerable<CodigoBarra> existingCodigosBarras = await _unitOfWork.CodigoBarraRepository
                                                                                     .GetExistingCodigosBarrasAsync(
-                                                                                        productoId, 
-                                                                                        newCodigosBarras, 
+                                                                                        productoId,
+                                                                                        newCodigosBarras,
                                                                                         cancellationToken
                                                                                     );
         foreach (string codigoBarra in newCodigosBarras)
@@ -79,7 +119,7 @@ public class UpdateProducto : IUpdateProducto
                     return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
                                                             .WithErrors([
                                                                 $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS}" +
-                                                                $" (CODIGO_BARRA: {codigoBarra})"
+                                                                        $" (CODIGO_BARRA: {codigoBarra})"
                                                             ]);
                 }
 
@@ -87,6 +127,8 @@ public class UpdateProducto : IUpdateProducto
                 existingCodigoBarra.FechaModificacion = DateTime.UtcNow;
             }
         }
+
+
         producto.UpdateIfChanged(requestDto, newCodigosBarras);
         SaveResult saveResult = await _unitOfWork.CompleteAsync(cancellationToken);
         if (!saveResult.IsSuccess)

@@ -47,20 +47,25 @@ public class CreateProducto : ICreateProducto
                                                     ]);
         }
 
-        List<string> codigosBarras = requestDto.CodigosBarras
-                                            .Select(x => x.Codigo.Trim())
-                                            .ToList();
-        foreach (string codigoBarra in codigosBarras)
+        List<string> codigosBarras = [];
+        if(requestDto.CodigosBarras.Count > 0)
         {
-            bool exists = await _unitOfWork.CodigoBarraRepository.CodigoBarraActivoExistsAsync(codigoBarra, cancellationToken);
-            if (exists)
+            codigosBarras = requestDto.CodigosBarras
+                                                .Select(x => x.Codigo.Trim())
+                                                .ToList();
+            foreach (string codigoBarra in codigosBarras)
             {
-                return Result<CreateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
-                                                        .WithErrors([
-                                                            $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} " +
-                                                            $"(CODIGO_BARRA: {codigoBarra})"
-                                                        ]);
+                bool exists = await _unitOfWork.CodigoBarraRepository.CodigoBarraActivoExistsAsync(codigoBarra, cancellationToken);
+                if (exists)
+                {
+                    return Result<CreateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
+                                                            .WithErrors([
+                                                                $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} " +
+                                                                $"(CODIGO_BARRA: {codigoBarra})"
+                                                            ]);
+                }
             }
+
         }
 
         Producto producto = requestDto.ToEntity(codigosBarras);

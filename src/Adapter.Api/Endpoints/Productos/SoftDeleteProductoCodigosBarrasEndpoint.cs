@@ -21,7 +21,7 @@ public class SoftDeleteProductoCodigosBarrasEndpoint : IEndpoint<ProductoEndpoin
 
     public static async Task<Result<SoftDeleteProductoCodigoDeBarraResponseDto>> SoftDeleteProductoCodigoBarraHandler(
         [FromRoute] int productoId,
-        [FromBody] SoftDeleteProductoCodigoDeBarraRequestDto parametersRequestDto,
+        [AsParameters] SoftDeleteProductoCodigoDeBarraRequestDto parametersRequestDto,
         [FromServices] ISoftDeleteProductoCodigoBarra useCase,
         CancellationToken cancellationToken
     )

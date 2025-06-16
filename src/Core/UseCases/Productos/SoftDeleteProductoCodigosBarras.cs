@@ -25,7 +25,7 @@ public class SoftDeleteProductoCodigosBarras : ISoftDeleteProductoCodigoBarra
         CancellationToken cancellationToken
     )
     {
-        if (parametersRequestDto.CodigoBarraIds.Count <= 0)
+        if (parametersRequestDto.CodigoBarraIds.Count() <= 0)
         {
             return Result<SoftDeleteProductoCodigoDeBarraResponseDto>.Failure(HttpStatusCode.BadRequest)
                                                                      .WithErrors([ValidationMessages.Producto.PRODUCTO_CODIGO_BARRA_NOT_VALID]);
@@ -50,7 +50,7 @@ public class SoftDeleteProductoCodigosBarras : ISoftDeleteProductoCodigoBarra
                                                                 x => parametersRequestDto.CodigoBarraIds.Contains(x.Id)
                                                             )
                                                             .ToList();
-        if (codigosBarrasToDelete.Count != parametersRequestDto.CodigoBarraIds.Count)
+        if (codigosBarrasToDelete.Count != parametersRequestDto.CodigoBarraIds.Count())
         {
             return Result<SoftDeleteProductoCodigoDeBarraResponseDto>.Failure(HttpStatusCode.NotFound)
                                                                      .WithErrors([
