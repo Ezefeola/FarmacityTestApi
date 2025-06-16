@@ -29,7 +29,7 @@ The solution is organized around Hexagonal Architecture, with clearly separated 
 ```bash
 
 git clone https://github.com/Ezefeola/FarmacityTestApi.git
-cd farmacity-test-backend
+cd FarmacityTestApi
 
 ```
 
@@ -39,5 +39,5 @@ Make sure you're in the root of the solution and that the SDK for .NET 8 is inst
 ### Run the API locally
 
 ```bash
-cd Adapter.Api
+cd src/Adapter.Api
 dotnet run --launch-profile "https"
