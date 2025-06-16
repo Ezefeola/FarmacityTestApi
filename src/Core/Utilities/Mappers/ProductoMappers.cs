@@ -56,7 +56,9 @@ public static class ProductoMappers
             Activo = producto.Activo,
             FechaAlta = producto.FechaAlta,
             FechaModificacion = producto.FechaModificacion,
-            CodigosBarras = producto.CodigosBarras.Select(codigoBarra => new CodigoBarraResponseDto
+            CodigosBarras = producto.CodigosBarras
+                                            .Where(x => x.Activo)
+                                            .Select(codigoBarra => new CodigoBarraResponseDto
             {
                 CodigoBarraId = codigoBarra.Id,
                 Codigo = codigoBarra.Codigo,

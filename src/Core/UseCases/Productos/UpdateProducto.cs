@@ -67,16 +67,18 @@ public class UpdateProducto : IUpdateProducto
                                                                                     .ToList();
         foreach (UpdateCodigoBarraRequestDto codigoBarra in codigosBarrasToUpdate)
         {
-            CodigoBarra? existingCodigoBarra = producto.CodigosBarras.FirstOrDefault(cb => cb.Id == codigoBarra.CodigoBarraId);
+            CodigoBarra? existingCodigoBarra = producto.CodigosBarras.FirstOrDefault(x => x.Id == codigoBarra.CodigoBarraId);
             if (existingCodigoBarra is null)
             {
-                    return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
-                                                            .WithErrors([
-                                                                $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_NOT_FOUND}" +
+                return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
+                                                        .WithErrors([
+                                                            $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_NOT_FOUND}" +
                                                                 $" (CODIGO_BARRA_ID:{codigoBarra.CodigoBarraId})"
-                                                            ]);
+                                                        ]);
             }
-            if (!existingCodigoBarra.Codigo.Equals(codigoBarra.Codigo, StringComparison.OrdinalIgnoreCase))
+
+            bool isSameCodigoBarra = existingCodigoBarra.Codigo.Equals(codigoBarra.Codigo, StringComparison.OrdinalIgnoreCase);
+            if (!isSameCodigoBarra)
             {
                 bool codigoBarraActivoExists = await _unitOfWork.CodigoBarraRepository.CodigoBarraActivoExistsAsync(codigoBarra.Codigo, cancellationToken);
                 if (codigoBarraActivoExists)
@@ -84,19 +86,11 @@ public class UpdateProducto : IUpdateProducto
                     return Result<UpdateProductoResponseDto>.Failure(HttpStatusCode.BadRequest)
                                                             .WithErrors([
                                                                 $"{ValidationMessages.CodigoBarra.CODIGO_BARRA_EXISTS} " +
-                                                                $"(CODIGO: {codigoBarra.Codigo}"
+                                                                $"(CODIGO: {codigoBarra.Codigo})"
                                                             ]);
                 }
-
-                existingCodigoBarra.Codigo = codigoBarra.Codigo;
-                existingCodigoBarra.FechaModificacion = DateTime.UtcNow;
-
-                if (!existingCodigoBarra.Activo)
-                {
-                    existingCodigoBarra.Activo = true;
-                    existingCodigoBarra.FechaModificacion = DateTime.UtcNow;
-                }
             }
+            existingCodigoBarra.UpdateIfChanged(codigoBarra.Codigo);
         }
 
         List<string> newCodigosBarras = requestDto.CodigosBarras
@@ -128,8 +122,15 @@ public class UpdateProducto : IUpdateProducto
             }
         }
 
-
-        producto.UpdateIfChanged(requestDto, newCodigosBarras);
+        if(newCodigosBarras.Count > 0)
+        {
+            producto.AddNewCodigosBarras(newCodigosBarras);
+        }
+        producto.UpdateIfChanged(
+            requestDto.Nombre, 
+            requestDto.Precio,
+            requestDto.CantidadEnStock
+        );
         SaveResult saveResult = await _unitOfWork.CompleteAsync(cancellationToken);
         if (!saveResult.IsSuccess)
         {

@@ -1,5 +1,4 @@
-﻿using Core.Contracts.DTOs.Productos.Request;
-using Core.Domain.Abstractions;
+﻿using Core.Domain.Abstractions;
 
 namespace Core.Domain.Entities;
 public class Producto : Entity<int>
@@ -32,6 +31,57 @@ public class Producto : Entity<int>
     public int CantidadEnStock { get; set; }
     public List<CodigoBarra> CodigosBarras { get; set; } = [];
 
+    public void UpdateIfChanged(
+        string? nombre,
+        decimal? precio,
+        int? cantidadEnStock
+    )
+    {
+        bool anyUpdated = false;
+
+        if (!string.IsNullOrWhiteSpace(nombre) && !nombre.Equals(Nombre, StringComparison.OrdinalIgnoreCase))
+        {
+            Nombre = nombre;
+            anyUpdated = true;
+        }
+
+        if (precio.HasValue && precio.Value != Precio)
+        {
+            Precio = precio.Value;
+            anyUpdated = true;
+        }
+
+        if (cantidadEnStock.HasValue && cantidadEnStock.Value != CantidadEnStock)
+        {
+            CantidadEnStock = cantidadEnStock.Value;
+            anyUpdated = true;
+        }
+
+        if (anyUpdated)
+        {
+            FechaModificacion = DateTime.UtcNow;
+        }
+    }
+
+    public void AddNewCodigosBarras(IEnumerable<string> newCodigosBarras)
+    {
+        HashSet<string> existingCodigosBarras = CodigosBarras
+                                                        .Select(x => x.Codigo)
+                                                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (string codigoBarra in newCodigosBarras)
+        {
+            if (!existingCodigosBarras.Contains(codigoBarra))
+            {
+                CodigosBarras.Add(new CodigoBarra
+                {
+                    Codigo = codigoBarra,
+                    Activo = true,
+                    FechaAlta = DateTime.UtcNow
+                });
+            }
+        }
+    }
+
     public Producto SoftDelete()
     {
         if (!Activo) return this;
@@ -48,48 +98,5 @@ public class Producto : Entity<int>
         }
 
         return this;
-    }
-
-    public void UpdateIfChanged(UpdateProductoRequestDto requestDto, List<string> codigosBarras)
-    {
-        bool anyUpdated = false;
-        if (!string.IsNullOrWhiteSpace(requestDto.Nombre))
-        {
-            Nombre = requestDto.Nombre;
-            anyUpdated = true;
-        }
-
-        if (requestDto.Precio.HasValue)
-        {
-            Precio = requestDto.Precio.Value;
-            anyUpdated = true;
-        }
-         
-        if (requestDto.CantidadEnStock.HasValue)
-        {
-            CantidadEnStock = requestDto.CantidadEnStock.Value;
-            anyUpdated = true;
-        }
-
-        IEnumerable<string> associatedCodigosBarras = CodigosBarras.Select(x => x.Codigo);
-        IEnumerable<CodigoBarra> newCodigosBarras = codigosBarras
-                                                        .Except(associatedCodigosBarras, StringComparer.OrdinalIgnoreCase)
-                                                        .Select(codigo => new CodigoBarra
-                                                        {
-                                                            Codigo = codigo,
-                                                            Activo = true,
-                                                            FechaAlta = DateTime.UtcNow
-                                                        });
-        if (newCodigosBarras.Count() > 0)
-        {
-            CodigosBarras.AddRange(newCodigosBarras);
-            anyUpdated = true;
-        }
-
-
-        if (anyUpdated)
-        {
-            FechaModificacion = DateTime.UtcNow;
-        }
     }
 }
