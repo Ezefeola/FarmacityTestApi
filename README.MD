@@ -42,7 +42,31 @@ cd FarmacityTestApi
 
 ```
 
-2. ## Running the Project
+## 2. Adapt your Database Connection String
+Go to the appettings.json file and you will see something like this:
+```c
+ "ConnectionStrings": {
+   "FarmacityTestDb": "Server=localhost\\SQLEXPRESS; Database=FarmacityTestDb; TrustServerCertificate=True; Trusted_Connection=True;"
+ },
+```
+You need to adapt the Server if its required.
+
+3. ## Run The Migrations
+Make sure that you have dotnet entity framework tools installed:  dotnet tool install --global dotnet-ef
+
+To execute the migration commands make sure that you are at src/ folder.
+
+Command to add a new migration: dotnet ef migrations add Initial --project Adapter.SqlServer --startup-project Adapter.Api --output-dir Migrations
+Command to apply a migration:  dotnet ef database update --project Adapter.PostgreSql --startup-project Adapter.Api
+```bash
+cd src/
+
+dotnet ef migrations add Initial --project Adapter.SqlServer --startup-project Adapter.Api --output-dir Migrations
+
+dotnet ef database update --project Adapter.SqlServer --startup-project Adapter.Api
+```
+
+4. ## Running the Project
 Make sure you're in the root of the solution and that the SDK for .NET 8 is installed.
 ### Run the API locally
 
@@ -51,7 +75,7 @@ cd src/Adapter.Api
 dotnet run --launch-profile "https"
 ```
 
-3. ### Run Api Tests
+5. ### Run Api Tests
 Make sure you're in the root of the solution and that the SDK for .NET 8 is installed.
 
 ```bash

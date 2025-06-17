@@ -28,10 +28,10 @@ public class CreateProductoTests : UseCaseTestBase<CreateProducto, CreateProduct
             Nombre = "",
             Precio = -1
         };
-        List<ValidationFailure> failures = new()
-        {
+        List<ValidationFailure> failures =
+        [
             new ValidationFailure("Nombre", "Nombre no puede estar vacío")
-        };
+        ];
 
         ValidatorMock.Setup(v => v.Validate(request)).Returns(new ValidationResult(failures));
 
